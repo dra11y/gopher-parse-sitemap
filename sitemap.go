@@ -3,6 +3,7 @@
 package sitemap
 
 import (
+	"context"
 	"encoding/xml"
 	"io"
 	"net/http"
@@ -71,34 +72,34 @@ type EntryConsumer func(Entry) error
 
 // Parse parses data which provides by the reader and for each sitemap
 // entry calls the consumer's function.
-func Parse(reader io.Reader, consumer EntryConsumer) error {
-	return parseLoop(reader, func(d *xml.Decoder, se *xml.StartElement) error {
+func Parse(ctx context.Context, reader io.Reader, consumer EntryConsumer) error {
+	return parseLoop(ctx, reader, func(d *xml.Decoder, se *xml.StartElement) error {
 		return entryParser(d, se, consumer)
 	})
 }
 
 // ParseFromFile reads sitemap from a file, parses it and for each sitemap
 // entry calls the consumer's function.
-func ParseFromFile(sitemapPath string, consumer EntryConsumer) error {
+func ParseFromFile(ctx context.Context, sitemapPath string, consumer EntryConsumer) error {
 	sitemapFile, err := os.OpenFile(sitemapPath, os.O_RDONLY, os.ModeExclusive)
 	if err != nil {
 		return err
 	}
 	defer sitemapFile.Close()
 
-	return Parse(sitemapFile, consumer)
+	return Parse(ctx, sitemapFile, consumer)
 }
 
 // ParseFromSite downloads sitemap from a site, parses it and for each sitemap
 // entry calls the consumer's function.
-func ParseFromSite(url string, consumer EntryConsumer) error {
+func ParseFromSite(ctx context.Context, url string, consumer EntryConsumer) error {
 	res, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
-	return Parse(res.Body, consumer)
+	return Parse(ctx, res.Body, consumer)
 }
 
 // IndexEntryConsumer is a type represents consumer of parsed sitemaps indexes entries
@@ -106,32 +107,32 @@ type IndexEntryConsumer func(IndexEntry) error
 
 // ParseIndex parses data which provides by the reader and for each sitemap index
 // entry calls the consumer's function.
-func ParseIndex(reader io.Reader, consumer IndexEntryConsumer) error {
-	return parseLoop(reader, func(d *xml.Decoder, se *xml.StartElement) error {
+func ParseIndex(ctx context.Context, reader io.Reader, consumer IndexEntryConsumer) error {
+	return parseLoop(ctx, reader, func(d *xml.Decoder, se *xml.StartElement) error {
 		return indexEntryParser(d, se, consumer)
 	})
 }
 
 // ParseIndexFromFile reads sitemap index from a file, parses it and for each sitemap
 // index entry calls the consumer's function.
-func ParseIndexFromFile(sitemapPath string, consumer IndexEntryConsumer) error {
+func ParseIndexFromFile(ctx context.Context, sitemapPath string, consumer IndexEntryConsumer) error {
 	sitemapFile, err := os.OpenFile(sitemapPath, os.O_RDONLY, os.ModeExclusive)
 	if err != nil {
 		return err
 	}
 	defer sitemapFile.Close()
 
-	return ParseIndex(sitemapFile, consumer)
+	return ParseIndex(ctx, sitemapFile, consumer)
 }
 
 // ParseIndexFromSite downloads sitemap index from a site, parses it and for each sitemap
 // index entry calls the consumer's function.
-func ParseIndexFromSite(sitemapURL string, consumer IndexEntryConsumer) error {
+func ParseIndexFromSite(ctx context.Context, sitemapURL string, consumer IndexEntryConsumer) error {
 	res, err := http.Get(sitemapURL)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
-	return ParseIndex(res.Body, consumer)
+	return ParseIndex(ctx, res.Body, consumer)
 }
