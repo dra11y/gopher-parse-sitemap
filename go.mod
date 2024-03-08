@@ -1,3 +1,3 @@
-module github.com/nguyenvanduocit/gopher-parse-sitemap
+module github.com/dra11y/gopher-parse-sitemap
 
-go 1.13
+go 1.22.0

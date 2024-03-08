@@ -92,8 +92,15 @@ func ParseFromFile(ctx context.Context, sitemapPath string, consumer EntryConsum
 
 // ParseFromSite downloads sitemap from a site, parses it and for each sitemap
 // entry calls the consumer's function.
-func ParseFromSite(ctx context.Context, url string, consumer EntryConsumer) error {
-	res, err := http.Get(url)
+func ParseFromSite(ctx context.Context, userAgent string, url string, consumer EntryConsumer) error {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return err
+	}
+	req.Close = true
+	req.Header.Add("Accept", "application/xml")
+	req.Header.Add("User-Agent", userAgent)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -127,8 +134,15 @@ func ParseIndexFromFile(ctx context.Context, sitemapPath string, consumer IndexE
 
 // ParseIndexFromSite downloads sitemap index from a site, parses it and for each sitemap
 // index entry calls the consumer's function.
-func ParseIndexFromSite(ctx context.Context, sitemapURL string, consumer IndexEntryConsumer) error {
-	res, err := http.Get(sitemapURL)
+func ParseIndexFromSite(ctx context.Context, userAgent string, sitemapURL string, consumer IndexEntryConsumer) error {
+	req, err := http.NewRequestWithContext(ctx, "GET", sitemapURL, nil)
+	if err != nil {
+		return err
+	}
+	req.Close = true
+	req.Header.Add("Accept", "application/xml")
+	req.Header.Add("User-Agent", userAgent)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}

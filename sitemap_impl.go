@@ -3,6 +3,7 @@ package sitemap
 import (
 	"context"
 	"encoding/xml"
+	"fmt"
 	"io"
 )
 
@@ -56,22 +57,22 @@ func parseLoop(ctx context.Context, reader io.Reader, parser elementParser) erro
 			t, tokenError := decoder.Token()
 
 			if tokenError == io.EOF {
-				break
+				return nil
 			} else if tokenError != nil {
+				fmt.Println("tokenError:", tokenError)
 				return tokenError
 			}
 
-			se, ok := t.(xml.StartElement)
-			if !ok {
+			se, isStartElement := t.(xml.StartElement)
+			if !isStartElement {
 				continue
 			}
 
 			parserError := parser(decoder, &se)
 			if parserError != nil {
+				fmt.Println("parserError:", parserError)
 				return parserError
 			}
 		}
 	}
-
-	return nil
 }
